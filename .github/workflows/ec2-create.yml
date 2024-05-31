@@ -1,37 +1,31 @@
-name: Create EC2 Instance
+name: Deploy EC2 Instance
 
 on:
   push:
     branches:
-      - main  # Trigger on commits to the main branch. Adjust as necessary.
+      - main  # Trigger on commits to the main branch (you can change this to your desired branch)
 
 jobs:
-  create-ec2:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
+      - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1  # Change to your preferred region
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Run EC2 instance script
+      - name: Launch EC2 instance
         run: |
-          #!/bin/bash
-          # Define instance parameters
-          INSTANCE_TYPE="t2.micro"
-          AMI_ID="ami-0f58b397bc5c1f2e8"  # Replace with your preferred AMI ID
-          KEY_NAME="DEVESHKEY"  # Replace with your key pair name
-          
-          # Create EC2 instance
           aws ec2 run-instances \
-            --image-id $AMI_ID \
+            --image-id ami-0f58b397bc5c1f2e8 \  # Replace with your preferred AMI ID
             --count 1 \
-            --instance-type $INSTANCE_TYPE \
-            --key-name $KEY_NAME \
-            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=GitHubActionInstance}]'
+            --instance-type t2.micro \  # Replace with your preferred instance type
+            --key-name DEVESHKEY \  # Replace with your key pair name
+            --security-group-ids sg-02226b9f786b1d1dc \  # Replace with your security group ID
+            --subnet-id subnet-094d8dd61df99b340  # Replace with your subnet ID
